@@ -167,6 +167,7 @@ export class GeminiClient {
     const platform = process.platform;
     const folderStructure = await getFolderStructure(cwd, {
       fileService: this.config.getFileService(),
+      maxItems: this.config.getMaxFolderItems(),
     });
     const context = `
   This is the Qwen Code. We are setting up the context for our chat.
@@ -297,6 +298,36 @@ export class GeminiClient {
 
     // Track the original model from the first call to detect model switching
     const initialModel = originalModel || this.config.getModel();
+
+    // Check session token limit before processing
+    const sessionTokenLimit = this.config.getSessionTokenLimit();
+    if (sessionTokenLimit > 0) {
+      // Get total tokens used in session from telemetry
+      const { uiTelemetryService } = await import(
+        '../telemetry/uiTelemetry.js'
+      );
+      const sessionMetrics = uiTelemetryService.getMetrics();
+
+      // Calculate total tokens used across all models in the session
+      let totalSessionTokens = 0;
+      for (const modelMetrics of Object.values(sessionMetrics.models)) {
+        totalSessionTokens += modelMetrics.tokens.total;
+      }
+
+      if (totalSessionTokens > sessionTokenLimit) {
+        yield {
+          type: GeminiEventType.SessionTokenLimitExceeded,
+          value: {
+            currentTokens: totalSessionTokens,
+            limit: sessionTokenLimit,
+            message:
+              `Session token limit exceeded: ${totalSessionTokens} tokens > ${sessionTokenLimit} limit. ` +
+              'Please start a new session or increase the sessionTokenLimit in your settings.json.',
+          },
+        };
+        return new Turn(this.getChat(), prompt_id);
+      }
+    }
 
     const compressed = await this.tryCompressChat(prompt_id);
 

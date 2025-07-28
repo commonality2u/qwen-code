@@ -140,6 +140,8 @@ export interface ConfigParameters {
   model: string;
   extensionContextFilePaths?: string[];
   maxSessionTurns?: number;
+  sessionTokenLimit?: number;
+  maxFolderItems?: number;
   listExtensions?: boolean;
   activeExtensions?: ActiveExtension[];
   noBrowser?: boolean;
@@ -206,6 +208,8 @@ export class Config {
   };
   private modelSwitchedDuringSession: boolean = false;
   private readonly maxSessionTurns: number;
+  private readonly sessionTokenLimit: number;
+  private readonly maxFolderItems: number;
   private readonly listExtensions: boolean;
   private readonly _activeExtensions: ActiveExtension[];
   flashFallbackHandler?: FlashFallbackHandler;
@@ -252,6 +256,8 @@ export class Config {
     this.model = params.model;
     this.extensionContextFilePaths = params.extensionContextFilePaths ?? [];
     this.maxSessionTurns = params.maxSessionTurns ?? -1;
+    this.sessionTokenLimit = params.sessionTokenLimit ?? 32000;
+    this.maxFolderItems = params.maxFolderItems ?? 20;
     this.listExtensions = params.listExtensions ?? false;
     this._activeExtensions = params.activeExtensions ?? [];
     this.noBrowser = params.noBrowser ?? false;
@@ -340,6 +346,14 @@ export class Config {
 
   getMaxSessionTurns(): number {
     return this.maxSessionTurns;
+  }
+
+  getSessionTokenLimit(): number {
+    return this.sessionTokenLimit;
+  }
+
+  getMaxFolderItems(): number {
+    return this.maxFolderItems;
   }
 
   setQuotaErrorOccurred(value: boolean): void {
