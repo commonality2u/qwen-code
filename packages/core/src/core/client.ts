@@ -299,40 +299,53 @@ export class GeminiClient {
     // Track the original model from the first call to detect model switching
     const initialModel = originalModel || this.config.getModel();
 
-    // Check session token limit before processing
+    const compressed = await this.tryCompressChat(prompt_id);
+
+    if (compressed) {
+      yield { type: GeminiEventType.ChatCompressed, value: compressed };
+    }
+
+    // Check session token limit after compression using accurate token counting
     const sessionTokenLimit = this.config.getSessionTokenLimit();
     if (sessionTokenLimit > 0) {
-      // Get total tokens used in session from telemetry
-      const { uiTelemetryService } = await import(
-        '../telemetry/uiTelemetry.js'
-      );
-      const sessionMetrics = uiTelemetryService.getMetrics();
+      // Get all the content that would be sent in an API call
+      const currentHistory = this.getChat().getHistory(true);
+      const userMemory = this.config.getUserMemory();
+      const systemPrompt = getCoreSystemPrompt(userMemory);
+      const environment = await this.getEnvironment();
 
-      // Calculate total tokens used across all models in the session
-      let totalSessionTokens = 0;
-      for (const modelMetrics of Object.values(sessionMetrics.models)) {
-        totalSessionTokens += modelMetrics.tokens.total;
-      }
+      // Create a mock request content to count total tokens
+      const mockRequestContent = [
+        {
+          role: 'system' as const,
+          parts: [{ text: systemPrompt }, ...environment],
+        },
+        ...currentHistory,
+      ];
 
-      if (totalSessionTokens > sessionTokenLimit) {
+      // Use the improved countTokens method for accurate counting
+      const { totalTokens: totalRequestTokens } =
+        await this.getContentGenerator().countTokens({
+          model: this.config.getModel(),
+          contents: mockRequestContent,
+        });
+
+      if (
+        totalRequestTokens !== undefined &&
+        totalRequestTokens > sessionTokenLimit
+      ) {
         yield {
           type: GeminiEventType.SessionTokenLimitExceeded,
           value: {
-            currentTokens: totalSessionTokens,
+            currentTokens: totalRequestTokens,
             limit: sessionTokenLimit,
             message:
-              `Session token limit exceeded: ${totalSessionTokens} tokens > ${sessionTokenLimit} limit. ` +
+              `Session token limit exceeded: ${totalRequestTokens} tokens > ${sessionTokenLimit} limit. ` +
               'Please start a new session or increase the sessionTokenLimit in your settings.json.',
           },
         };
         return new Turn(this.getChat(), prompt_id);
       }
-    }
-
-    const compressed = await this.tryCompressChat(prompt_id);
-
-    if (compressed) {
-      yield { type: GeminiEventType.ChatCompressed, value: compressed };
     }
     const turn = new Turn(this.getChat(), prompt_id);
     const resultStream = turn.run(request, signal);

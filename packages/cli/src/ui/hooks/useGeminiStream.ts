@@ -461,8 +461,8 @@ export const useGeminiStream = (
             `🚫 Session token limit exceeded: ${value.currentTokens.toLocaleString()} tokens > ${value.limit.toLocaleString()} limit.\n\n` +
             `💡 Solutions:\n` +
             `   • Start a new session: Use /clear command\n` +
-            `   • Increase limit: Add "sessionTokenLimit": (e.g., 40000) to your settings.json\n` +
-            `   • Compress history: The system will automatically compress on next request`,
+            `   • Increase limit: Add "sessionTokenLimit": (e.g., 128000) to your settings.json\n` +
+            `   • Compress history: Use /compress command to compress history`,
         },
         Date.now(),
       ),
