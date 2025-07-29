@@ -1738,7 +1738,9 @@ export class OpenAIContentGenerator implements ContentGenerator {
     const openaiResponse: OpenAIResponseFormat = {
       id: response.responseId || `chatcmpl-${Date.now()}`,
       object: 'chat.completion',
-      created: response.createTime ? Number(response.createTime) : Math.floor(Date.now() / 1000),
+      created: response.createTime
+        ? Number(response.createTime)
+        : Math.floor(Date.now() / 1000),
       model: this.model,
       choices: [choice],
     };
