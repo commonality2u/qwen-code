@@ -156,6 +156,11 @@ export interface ConfigParameters {
     temperature?: number;
     max_tokens?: number;
   };
+  systemPromptMappings?: Array<{
+    baseUrls?: string[];
+    modelNames?: string[];
+    template?: string;
+  }>;
 }
 
 export class Config {
@@ -206,6 +211,11 @@ export class Config {
     temperature?: number;
     max_tokens?: number;
   };
+  private readonly systemPromptMappings?: Array<{
+    baseUrls?: string[];
+    modelNames?: string[];
+    template?: string;
+  }>;
   private modelSwitchedDuringSession: boolean = false;
   private readonly maxSessionTurns: number;
   private readonly sessionTokenLimit: number;
@@ -264,6 +274,7 @@ export class Config {
     this.ideMode = params.ideMode ?? false;
     this.enableOpenAILogging = params.enableOpenAILogging ?? false;
     this.sampling_params = params.sampling_params;
+    this.systemPromptMappings = params.systemPromptMappings;
 
     if (params.contextFileName) {
       setGeminiMdFilename(params.contextFileName);
@@ -552,6 +563,16 @@ export class Config {
 
   getEnableOpenAILogging(): boolean {
     return this.enableOpenAILogging;
+  }
+
+  getSystemPromptMappings():
+    | Array<{
+        baseUrls?: string[];
+        modelNames?: string[];
+        template?: string;
+      }>
+    | undefined {
+    return this.systemPromptMappings;
   }
 
   async refreshMemory(): Promise<{ memoryContent: string; fileCount: number }> {
