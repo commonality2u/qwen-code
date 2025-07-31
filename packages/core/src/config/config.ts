@@ -37,13 +37,11 @@ import {
   DEFAULT_TELEMETRY_TARGET,
   DEFAULT_OTLP_ENDPOINT,
   TelemetryTarget,
-  StartSessionEvent,
 } from '../telemetry/index.js';
 import {
   DEFAULT_GEMINI_EMBEDDING_MODEL,
   DEFAULT_GEMINI_FLASH_MODEL,
 } from './models.js';
-import { ClearcutLogger } from '../telemetry/clearcut-logger/clearcut-logger.js';
 
 export enum ApprovalMode {
   DEFAULT = 'default',
@@ -285,9 +283,10 @@ export class Config {
     }
 
     if (this.getUsageStatisticsEnabled()) {
-      ClearcutLogger.getInstance(this)?.logStartSessionEvent(
-        new StartSessionEvent(this),
-      );
+      // ClearcutLogger.getInstance(this)?.logStartSessionEvent(
+      //   new StartSessionEvent(this),
+      // );
+      console.log('ClearcutLogger disabled - no data collection.');
     } else {
       console.log('Data collection is disabled.');
     }

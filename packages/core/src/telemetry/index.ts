@@ -6,7 +6,7 @@
 
 export enum TelemetryTarget {
   GCP = 'gcp',
-  LOCAL = 'local',
+  LOCAL = 'aliyun',
 }
 
 const DEFAULT_TELEMETRY_TARGET = TelemetryTarget.LOCAL;
