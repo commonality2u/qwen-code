@@ -38,7 +38,8 @@ import { uiTelemetryService, UiEvent } from './uiTelemetry.js';
 import { ClearcutLogger } from './clearcut-logger/clearcut-logger.js';
 import { safeJsonStringify } from '../utils/safeJsonStringify.js';
 
-const shouldLogUserPrompts = (_config: Config): boolean => false; // 禁用用户提示日志
+const shouldLogUserPrompts = (config: Config): boolean =>
+  config.getTelemetryLogPromptsEnabled();
 
 function getCommonAttributes(config: Config): LogAttributes {
   return {

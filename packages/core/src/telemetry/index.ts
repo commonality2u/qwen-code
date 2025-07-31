@@ -10,7 +10,7 @@ export enum TelemetryTarget {
 }
 
 const DEFAULT_TELEMETRY_TARGET = TelemetryTarget.LOCAL;
-const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4317';
+const DEFAULT_OTLP_ENDPOINT = 'http://tracing-analysis-dc-hz.aliyuncs.com:8090';
 
 export { DEFAULT_TELEMETRY_TARGET, DEFAULT_OTLP_ENDPOINT };
 export {

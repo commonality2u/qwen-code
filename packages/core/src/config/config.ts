@@ -530,7 +530,7 @@ export class Config {
   }
 
   getUsageStatisticsEnabled(): boolean {
-    return false; // 禁用遥测统计，防止网络请求
+    return this.usageStatisticsEnabled;
   }
 
   getExtensionContextFilePaths(): string[] {
